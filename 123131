@@ -1,1 +1,71 @@
-123123
+    function obfuscate(source, VarName, WaterMark)
+
+        warn("Started obfuscation")
+
+        local Variable = VarName or "botsfelo_"
+        local WM = type(WaterMark) == "string" and WaterMark or "WaterMark"
+
+        if not source then
+            source = [[print("Hello World!")]]
+        end
+
+        WM = "--[[".."\n".. "    "..WM.." | Secure by botsfelo" .. "\n".."]]--".."\n\n"
+
+        local function randomVarName(length)
+            local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+            local name = ""
+            for i = 1, length do
+                name = name .. chars:sub(math.random(1, #chars), math.random(1, #chars))
+            end
+            return name
+        end
+
+        local function stringToBinary(str)
+            local binary = {}
+            for i = 1, #str do
+                table.insert(binary, string.format("%08b", str:byte(i)))
+            end
+            return table.concat(binary, " ")
+        end
+
+        local function addBinary(number, s)
+            local topics = {
+                "Deobfuscate?",
+                "Hello World!",
+                "GhostyDuckyy",
+                "Free obfuscator!",
+                randomVarName(math.random(5, 15)),
+            }
+            for _ = 1, number do
+                local topicStr = topics[math.random(1, #topics)]
+                s = s .. ("local %s = \"%s\"; "):format(randomVarName(math.random(5, 12)), stringToBinary(topicStr))
+            end
+            return s
+        end
+
+        local function generateLoadString()
+            return "loadstring([=[ return function() " ..
+                   "local _run_"..randomVarName(10).." = function(input) " ..
+                   addBinary(math.random(3, 5), "") ..
+                   "end " ..
+                   "end ]=]):__call()"
+        end
+
+        local obfuscated = WM ..
+            addBinary(math.random(5, 10), "") ..
+            generateLoadString() ..
+            "; " ..
+            "local " .. Variable .. randomVarName(10) .. " = " .. generateLoadString() .. "; "
+
+        setclipboard(obfuscated)
+
+        warn("Obfuscation completed in "..tostring(tick() - os.clock()).." seconds")
+        return obfuscated
+    end
+
+    --// Module
+    return function(source, CustomVarName, WaterMark)
+        task.spawn(function()
+            obfuscate(source, CustomVarName, WaterMark)
+        end)
+    end
